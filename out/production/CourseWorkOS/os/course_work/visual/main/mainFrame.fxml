@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseEntered="#chooseFile" prefHeight="698.0" prefWidth="1012.0" styleClass="background" stylesheets="file:resources/themes/mainFrameTheme.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="os.course_work.visual.main.MainFrameController">
+	<children>
+		<TableView fx:id="processesTable" editable="true" layoutX="104.0" layoutY="70.0" prefHeight="580.0" prefWidth="805.0" tableMenuButtonVisible="true" AnchorPane.bottomAnchor="48.0" AnchorPane.leftAnchor="104.0" AnchorPane.rightAnchor="103.0" AnchorPane.topAnchor="70.0">
+			<columns>
+				<TableColumn fx:id="processColumn" prefWidth="246.0" text="Процесс" />
+				<TableColumn fx:id="pIDColumn" minWidth="0.0" prefWidth="93.0" text="PID" />
+				<TableColumn fx:id="parentIDColumn" prefWidth="157.0" text="Parent ID" />
+				<TableColumn fx:id="threadCountColumn" prefWidth="169.0" text="Число потоков" />
+				<TableColumn fx:id="priorityColumn" prefWidth="79.0" text="Приоритет" />
+			</columns>
+			<columnResizePolicy>
+				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+			</columnResizePolicy>
+		</TableView>
+		<MenuBar>
+			<menus>
+				<Menu mnemonicParsing="false" text="Файл">
+					<items>
+						<MenuItem fx:id="closeItem" mnemonicParsing="false" onAction="#closeProgram" text="Закрыть" />
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="Редактирование">
+					<items>
+						<Menu mnemonicParsing="false" text="Сортировать по">
+							<items>
+								<RadioMenuItem fx:id="processNameSort" mnemonicParsing="false" onAction="#sortByProcessName" text="Имя процесса">
+									<toggleGroup>
+										<ToggleGroup fx:id="Sort" />
+									</toggleGroup>
+								</RadioMenuItem>
+								<RadioMenuItem fx:id="PIDSort" mnemonicParsing="false" onAction="#sortByPID" text="PID" toggleGroup="$Sort" />
+								<RadioMenuItem fx:id="parentIdSort" mnemonicParsing="false" onAction="#sortByParentID" text="Parent ID" toggleGroup="$Sort" />
+								<RadioMenuItem fx:id="thrCntSort" mnemonicParsing="false" onAction="#sortByThreadsCount" text="Число потоков" toggleGroup="$Sort" />
+								<RadioMenuItem fx:id="priorSort" mnemonicParsing="false" onAction="#sortByPriority" text="Приоритет" toggleGroup="$Sort" />
+							</items>
+						</Menu>
+						<MenuItem fx:id="refreshListItem" mnemonicParsing="false" onAction="#refreshList" text="Обновить" />
+						<CheckMenuItem fx:id="autoRefreshListItem" mnemonicParsing="false" onAction="#autoRefresh" selected="true" text="Автобновление" />
+					</items>
+				</Menu>
+				<Menu mnemonicParsing="false" text="Вид">
+					<items>
+						<MenuItem fx:id="showTableItem" mnemonicParsing="false" onAction="#showTable" text="Таблица считанных из файла процессов" />
+					</items>
+				</Menu>
+				<Menu fx:id="helpMenu" mnemonicParsing="false" text="Помощь">
+					<items>
+						<MenuItem fx:id="showHelpItem" mnemonicParsing="false" onAction="#showHelp" text="Справка">
+                     <accelerator>
+                        <KeyCodeCombination alt="UP" code="F1" control="UP" meta="UP" shift="UP" shortcut="ANY" />
+                     </accelerator></MenuItem>
+                  <MenuItem fx:id="showAboutItem" mnemonicParsing="false" onAction="#showAbout" text="О программе" />
+					</items>
+				</Menu>
+			</menus>
+		</MenuBar>
+	</children>
+</AnchorPane>

@@ -1,0 +1,42 @@
+.background {
+  -fx-background-image: url("main.jpg");
+}
+
+
+.button {
+	
+  -fx-font-weight: 700;
+  -fx-color: white;
+  -fx-text-decoration: none;
+  -fx-border-radius: 3px;
+  -fx-background-color: rgb(64,199,129);
+  -fx-box-shadow: 0 -3px rgb(53,167,110);
+  -fx-transition: 0.2s;
+} 
+.button:hover { 
+	-fx-background-color: rgb(53, 167, 110); 
+}
+.button:active {
+  -fx-background-color: rgb(33,147,90);
+  -fx-box-shadow: 0 3px rgb(33,147,90) ;
+}
+
+.label {
+	-fx-font: 16px "System"
+}
+
+.check-combo-box-base{
+  -fx-font-weight: 700;
+  -fx-border-radius: 3px;
+  -fx-background-color: rgb(64,199,129);
+  -fx-box-shadow: 0 -3px rgb(53,167,110) ;
+  -fx-transition: 0.2s;
+}
+
+.check-combo-box:hover {
+  -fx-background-color: rgb(53, 167, 110);
+}
+.check-combo-box:showing {
+  -fx-background-color: rgb(33,147,90);
+  -fx-box-shadow: 0 3px rgb(33,147,90) ;
+}

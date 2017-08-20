@@ -1,0 +1,224 @@
+<html>
+<head>
+<title>MainFrameController.java</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.ln { color: rgb(0,0,0); font-weight: normal; font-style: normal; }
+.s0 { color: rgb(0,0,128); font-weight: bold; }
+.s1 { color: rgb(0,0,0); }
+.s2 { color: rgb(0,128,0); font-weight: bold; }
+.s3 { color: rgb(0,0,255); }
+</style>
+</head>
+<BODY BGCOLOR="#ffffff">
+<TABLE CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#C0C0C0" >
+<TR><TD><CENTER>
+<FONT FACE="Arial, Helvetica" COLOR="#000000">
+MainFrameController.java</FONT>
+</center></TD></TR></TABLE>
+<pre>
+<span class="s0">package </span><span class="s1">os.course_work.visual.main; 
+ 
+</span><span class="s0">import </span><span class="s1">javafx.collections.ObservableList; 
+</span><span class="s0">import </span><span class="s1">javafx.event.ActionEvent; 
+</span><span class="s0">import </span><span class="s1">javafx.fxml.Initializable; 
+</span><span class="s0">import </span><span class="s1">javafx.scene.Scene; 
+</span><span class="s0">import </span><span class="s1">javafx.scene.control.*; 
+</span><span class="s0">import </span><span class="s1">javafx.scene.image.Image; 
+</span><span class="s0">import </span><span class="s1">javafx.scene.image.ImageView; 
+</span><span class="s0">import </span><span class="s1">javafx.scene.layout.AnchorPane; 
+</span><span class="s0">import </span><span class="s1">javafx.stage.FileChooser; 
+</span><span class="s0">import </span><span class="s1">javafx.stage.Stage; 
+</span><span class="s0">import </span><span class="s1">os.course_work.visual.dialogs.DialogManager; 
+</span><span class="s0">import </span><span class="s1">os.course_work.comparators.*; 
+</span><span class="s0">import </span><span class="s1">os.course_work.data_channel.FileSync; 
+</span><span class="s0">import </span><span class="s1">os.course_work.data_channel.ReadProcess; 
+</span><span class="s0">import </span><span class="s1">os.course_work.data_channel.ReadProcesssList; 
+</span><span class="s0">import </span><span class="s1">os.course_work.data_channel.WriterProcess; 
+</span><span class="s0">import </span><span class="s1">os.course_work.sysmonitor.CurrentProcess; 
+</span><span class="s0">import </span><span class="s1">os.course_work.sysmonitor.ProcessList; 
+</span><span class="s0">import </span><span class="s1">os.course_work.sysmonitor.ProcessMonitor; 
+</span><span class="s0">import </span><span class="s1">os.course_work.threads.ProgramThreads; 
+ 
+</span><span class="s0">import </span><span class="s1">java.awt.Desktop; 
+</span><span class="s0">import </span><span class="s1">java.io.File; 
+</span><span class="s0">import </span><span class="s1">java.io.IOException; 
+</span><span class="s0">import </span><span class="s1">java.net.MalformedURLException; 
+</span><span class="s0">import </span><span class="s1">java.net.URL; 
+</span><span class="s0">import </span><span class="s1">java.util.*; 
+ 
+</span><span class="s0">public class </span><span class="s1">MainFrameController </span><span class="s0">implements </span><span class="s1">Initializable { 
+ 
+    </span><span class="s0">public </span><span class="s1">TableView&lt;CurrentProcess&gt; processesTable; 
+    </span><span class="s0">public </span><span class="s1">RadioMenuItem processNameSort; 
+    </span><span class="s0">public </span><span class="s1">ToggleGroup Sort; 
+    </span><span class="s0">public </span><span class="s1">RadioMenuItem PIDSort; 
+    </span><span class="s0">public </span><span class="s1">CheckMenuItem autoRefreshListItem; 
+    </span><span class="s0">public </span><span class="s1">TableColumn&lt;CurrentProcess, String&gt; processColumn; 
+    </span><span class="s0">public </span><span class="s1">TableColumn&lt;CurrentProcess, Integer&gt; pIDColumn; 
+    </span><span class="s0">public </span><span class="s1">TableColumn&lt;CurrentProcess, Integer&gt; parentIDColumn; 
+    </span><span class="s0">public </span><span class="s1">TableColumn&lt;CurrentProcess, Integer&gt; threadCountColumn; 
+    </span><span class="s0">public </span><span class="s1">TableColumn&lt;CurrentProcess, Integer&gt; priorityColumn; 
+    ResourceBundle bundle = ResourceBundle.getBundle(</span><span class="s2">&quot;os.course_work.bundles.ResBundle&quot;</span><span class="s1">); 
+    </span><span class="s0">private </span><span class="s1">Timer monitorTimer = </span><span class="s0">new </span><span class="s1">Timer(); 
+    </span><span class="s0">private </span><span class="s1">Timer writerTimer = </span><span class="s0">new </span><span class="s1">Timer(); 
+    </span><span class="s0">private </span><span class="s1">Timer readTimer = </span><span class="s0">new </span><span class="s1">Timer(); 
+    ProcessMonitor taskMonitor = </span><span class="s0">new </span><span class="s1">ProcessMonitor(); 
+    WriterProcess taskWriter = </span><span class="s0">new </span><span class="s1">WriterProcess(); 
+    ReadProcess taskReader = </span><span class="s0">new </span><span class="s1">ReadProcess(); 
+ 
+    </span><span class="s0">public void </span><span class="s1">closeProgram(ActionEvent actionEvent) { 
+        Main.closeApp(); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">createMonitor(</span><span class="s0">boolean </span><span class="s1">withRepeat) { 
+        ProcessMonitor current_task = </span><span class="s0">new </span><span class="s1">ProcessMonitor(); 
+        taskMonitor = current_task; 
+        </span><span class="s0">if </span><span class="s1">(withRepeat) 
+            monitorTimer.scheduleAtFixedRate(current_task, </span><span class="s3">1000</span><span class="s1">, </span><span class="s3">3000</span><span class="s1">); 
+        </span><span class="s0">else</span><span class="s1"> 
+            monitorTimer.schedule(current_task, </span><span class="s3">1000</span><span class="s1">); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">createWriter(</span><span class="s0">boolean </span><span class="s1">withRepeat) { 
+        WriterProcess task = </span><span class="s0">new </span><span class="s1">WriterProcess(); 
+        taskWriter = task; 
+        </span><span class="s0">if </span><span class="s1">(withRepeat) 
+            writerTimer.scheduleAtFixedRate(task, </span><span class="s3">1000</span><span class="s1">, </span><span class="s3">4000</span><span class="s1">); 
+        </span><span class="s0">else</span><span class="s1"> 
+            writerTimer.schedule(task, </span><span class="s3">1000</span><span class="s1">); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">createReader(</span><span class="s0">boolean </span><span class="s1">withRepeat) { 
+        ReadProcess task = </span><span class="s0">new </span><span class="s1">ReadProcess(); 
+        taskReader = task; 
+        </span><span class="s0">if </span><span class="s1">(withRepeat) 
+            readTimer.scheduleAtFixedRate(task, </span><span class="s3">1000</span><span class="s1">, </span><span class="s3">5000</span><span class="s1">); 
+        </span><span class="s0">else</span><span class="s1"> 
+            readTimer.schedule(task, </span><span class="s3">1000</span><span class="s1">); 
+    } 
+ 
+    </span><span class="s0">public </span><span class="s1">Stage createReadProcessTable() { 
+        Stage stage = </span><span class="s0">new </span><span class="s1">Stage(); 
+        ObservableList&lt;CurrentProcess&gt; running_processes = ReadProcesssList.getRunning_processes(); 
+        TableColumn&lt;CurrentProcess, String&gt; processColumn = </span><span class="s0">new </span><span class="s1">TableColumn&lt;&gt;(bundle.getString(</span><span class="s2">&quot;process&quot;</span><span class="s1">)); 
+        processColumn.setPrefWidth(</span><span class="s3">246</span><span class="s1">); 
+        TableColumn&lt;CurrentProcess, Integer&gt; pIDColumn = </span><span class="s0">new </span><span class="s1">TableColumn&lt;&gt;(</span><span class="s2">&quot;PID&quot;</span><span class="s1">); 
+        pIDColumn.setPrefWidth(</span><span class="s3">93</span><span class="s1">); 
+        TableColumn&lt;CurrentProcess, Integer&gt; parentIDColumn = </span><span class="s0">new </span><span class="s1">TableColumn&lt;&gt;(bundle.getString(</span><span class="s2">&quot;parentID&quot;</span><span class="s1">)); 
+        parentIDColumn.setPrefWidth(</span><span class="s3">69</span><span class="s1">); 
+        TableColumn&lt;CurrentProcess, Integer&gt; threadsCountCol = </span><span class="s0">new </span><span class="s1">TableColumn&lt;&gt;(bundle.getString(</span><span class="s2">&quot;threadsCount&quot;</span><span class="s1">)); 
+        threadsCountCol.setPrefWidth(</span><span class="s3">79</span><span class="s1">); 
+        TableColumn&lt;CurrentProcess, Integer&gt; basicPriCol = </span><span class="s0">new </span><span class="s1">TableColumn&lt;&gt;(bundle.getString(</span><span class="s2">&quot;priority&quot;</span><span class="s1">)); 
+        basicPriCol.setPrefWidth(</span><span class="s3">200</span><span class="s1">); 
+        TableView&lt;CurrentProcess&gt; tableView = </span><span class="s0">new </span><span class="s1">TableView&lt;&gt;(); 
+        tableView.setEditable(</span><span class="s0">true</span><span class="s1">); 
+        tableView.getColumns().addAll(processColumn, pIDColumn, parentIDColumn, threadsCountCol, basicPriCol); 
+        tableView.setItems(running_processes); 
+        processColumn.setCellValueFactory(celldata -&gt; celldata.getValue().nameProperty()); 
+        pIDColumn.setCellValueFactory(celldata -&gt; celldata.getValue().fPIDProperty().asObject()); 
+        parentIDColumn.setCellValueFactory(celldata -&gt; celldata.getValue().parentIDProperty().asObject()); 
+        threadsCountCol.setCellValueFactory(celldata -&gt; celldata.getValue().threadsCountProperty().asObject()); 
+        basicPriCol.setCellValueFactory(celldata -&gt; celldata.getValue().basicPriorityProperty().asObject()); 
+        tableView.setItems(running_processes); 
+        tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY); 
+        stage.setScene(</span><span class="s0">new </span><span class="s1">Scene(tableView, </span><span class="s3">810</span><span class="s1">, </span><span class="s3">600</span><span class="s1">)); 
+        stage.setTitle(bundle.getString(</span><span class="s2">&quot;readProcesses&quot;</span><span class="s1">)); 
+        </span><span class="s0">return </span><span class="s1">stage; 
+    } 
+ 
+    @Override 
+    </span><span class="s0">public void </span><span class="s1">initialize(URL location, ResourceBundle resources) { 
+        ProgramThreads.tasks.addAll(monitorTimer, writerTimer, readTimer); 
+        processNameSort.setSelected(</span><span class="s0">true</span><span class="s1">); 
+        processColumn.setCellValueFactory(celldata -&gt; celldata.getValue().nameProperty()); 
+        pIDColumn.setCellValueFactory(celldata -&gt; celldata.getValue().fPIDProperty().asObject()); 
+        parentIDColumn.setCellValueFactory(celldata -&gt; celldata.getValue().parentIDProperty().asObject()); 
+        threadCountColumn.setCellValueFactory(celldata -&gt; celldata.getValue().threadsCountProperty().asObject()); 
+        priorityColumn.setCellValueFactory(celldata -&gt; celldata.getValue().basicPriorityProperty().asObject()); 
+        processesTable.setItems(ProcessList.getRunning_processes()); 
+        ReadTable.setTable_stage(createReadProcessTable()); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">sortByProcessName(ActionEvent actionEvent) { 
+        Comparator&lt;CurrentProcess&gt; comparator = </span><span class="s0">new </span><span class="s1">SortByName(); 
+        CurrentComparator.setCurrentComparator(comparator); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">sortByPID(ActionEvent actionEvent) { 
+        Comparator&lt;CurrentProcess&gt; comparator = </span><span class="s0">new </span><span class="s1">SortByPID(); 
+        CurrentComparator.setCurrentComparator(comparator); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">sortByParentID(ActionEvent actionEvent) { 
+        Comparator&lt;CurrentProcess&gt; comparator = </span><span class="s0">new </span><span class="s1">SortByParentID(); 
+        CurrentComparator.setCurrentComparator(comparator); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">sortByThreadsCount(ActionEvent actionEvent) { 
+        Comparator&lt;CurrentProcess&gt; comparator = </span><span class="s0">new </span><span class="s1">SortByThreadsCount(); 
+        CurrentComparator.setCurrentComparator(comparator); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">sortByPriority(ActionEvent actionEvent) { 
+        Comparator&lt;CurrentProcess&gt; comparator = </span><span class="s0">new </span><span class="s1">SortByPriority(); 
+        CurrentComparator.setCurrentComparator(comparator); 
+    } 
+ 
+ 
+    </span><span class="s0">public void </span><span class="s1">showTable(ActionEvent actionEvent) { 
+        </span><span class="s0">if </span><span class="s1">(!ReadTable.getTableStage().isShowing()) { 
+            ReadTable.setTable_stage(createReadProcessTable()); 
+            ReadTable.getTableStage().show(); 
+        } 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">chooseFile() { 
+        </span><span class="s0">if </span><span class="s1">(FileSync.isFirstLaunch()) { 
+            FileChooser filech = </span><span class="s0">new </span><span class="s1">FileChooser(); 
+            filech.setTitle(bundle.getString(</span><span class="s2">&quot;dataChannel&quot;</span><span class="s1">)); 
+            filech.setInitialDirectory(</span><span class="s0">new </span><span class="s1">File(</span><span class="s2">&quot;resources/used&quot;</span><span class="s1">)); 
+            filech.getExtensionFilters().add(</span><span class="s0">new </span><span class="s1">FileChooser.ExtensionFilter(bundle.getString(</span><span class="s2">&quot;text&quot;</span><span class="s1">), </span><span class="s2">&quot;*.txt&quot;</span><span class="s1">)); 
+            filech.getExtensionFilters().add(</span><span class="s0">new </span><span class="s1">FileChooser.ExtensionFilter(bundle.getString(</span><span class="s2">&quot;allFiles&quot;</span><span class="s1">), </span><span class="s2">&quot;*.*&quot;</span><span class="s1">)); 
+            filech.setInitialFileName(</span><span class="s2">&quot;processes&quot;</span><span class="s1">); 
+            FileSync.setFile(filech.showSaveDialog(Main.getPrimary())); 
+            FileSync.setFirstLaunch(</span><span class="s0">false</span><span class="s1">); 
+            createMonitor(</span><span class="s0">true</span><span class="s1">); 
+            createWriter(</span><span class="s0">true</span><span class="s1">); 
+            createReader(</span><span class="s0">true</span><span class="s1">); 
+        } 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">autoRefresh(ActionEvent actionEvent) { 
+        </span><span class="s0">if </span><span class="s1">(autoRefreshListItem.isSelected()) { 
+            createMonitor(</span><span class="s0">true</span><span class="s1">); 
+            createWriter(</span><span class="s0">true</span><span class="s1">); 
+            createReader(</span><span class="s0">true</span><span class="s1">); 
+        } </span><span class="s0">else </span><span class="s1">{ 
+            taskMonitor.cancel(); 
+            taskWriter.cancel(); 
+            taskReader.cancel(); 
+        } 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">refreshList(ActionEvent actionEvent) { 
+        createMonitor(</span><span class="s0">false</span><span class="s1">); 
+        createWriter(</span><span class="s0">false</span><span class="s1">); 
+        createReader(</span><span class="s0">false</span><span class="s1">); 
+    } 
+ 
+    </span><span class="s0">public void </span><span class="s1">showHelp() { 
+        File help = </span><span class="s0">new </span><span class="s1">File(</span><span class="s2">&quot;resources/help/ProcessMonitor.chm&quot;</span><span class="s1">); 
+        Desktop desktop = </span><span class="s0">null</span><span class="s1">; 
+        </span><span class="s0">if </span><span class="s1">(Desktop.isDesktopSupported()) 
+            desktop = Desktop.getDesktop(); 
+        </span><span class="s0">try </span><span class="s1">{ 
+            desktop.open(help); 
+        } </span><span class="s0">catch </span><span class="s1">(IOException e) { 
+            DialogManager.showErrorDialog(bundle.getString(</span><span class="s2">&quot;error.open.file&quot;</span><span class="s1">)); 
+        } 
+    } 
+} 
+</span></pre>
+</body>
+</html>
